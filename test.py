@@ -1,5 +1,5 @@
 from database.orm import Session
-from models import InformationSection, Image, Project
+from database.models import InformationSection, Image, Project
 from pyvindex import VectorIndex
 
 session = Session()

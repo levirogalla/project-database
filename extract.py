@@ -1,7 +1,7 @@
 from datetime import date
 from logging import config
 from bs4 import BeautifulSoup
-from models import InformationSection, Project, Image
+from database.models import InformationSection, Project, Image
 from pyvindex import VectorIndex
 import yaml
 import os
