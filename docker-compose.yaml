@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  db:
+    build: ./database
+    container_name: postgres-project-db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: project-db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/Users/levirogalla/Dev/Practice/Projects/project-database/database/db-data
+
+volumes:
+  pgdata:
