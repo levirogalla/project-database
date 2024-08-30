@@ -9,7 +9,6 @@ Common column fields:
 """
 
 from sqlalchemy import (
-    Column,
     Integer,
     Float,
     Numeric,
@@ -24,8 +23,9 @@ from sqlalchemy import (
     ARRAY,
     ForeignKey,
     null,
-    LargeBinary
+    LargeBinary,
+    Enum,
 )
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 from pgvector.sqlalchemy import Vector
-from .orm import Base, create_tables, Session
+from .orm import Base, create_tables, Session, delete_tables, engine

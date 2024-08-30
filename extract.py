@@ -1,7 +1,7 @@
 from datetime import date
 from logging import config
 from bs4 import BeautifulSoup
-from database.models import InformationSection, Project, Image
+from database.models import InformationSection, ORMProject, Image
 from pyvindex import VectorIndex
 import yaml
 import os
@@ -18,7 +18,7 @@ def get_file_content(filepath: str):
         return f.read()
 
 
-def parse_html(filepath: str, project: Project, images_folder: str):
+def parse_html(filepath: str, project: ORMProject, images_folder: str):
     sections = []
     images = []
     vindex = VectorIndex("sentence-transformers/all-mpnet-base-v2")
@@ -61,7 +61,7 @@ def main():
         config = yaml.safe_load(f)
     print(2)
     for project_config in config["projects"]:
-        project = Project(
+        project = ORMProject(
             name=project_config["name"],
             short_description=project_config["short_description"],
             embedding=vindex.embed_query(project_config["short_description"]),

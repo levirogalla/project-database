@@ -1,8 +1,10 @@
 
+from datetime import date
+from typing import Literal
 from sqlalchemy import LargeBinary
+from typing import Literal
 from database.orm import (
     Base,
-    Column,
     Text,
     Integer,
     String,
@@ -10,39 +12,48 @@ from database.orm import (
     Date,
     ForeignKey,
     create_tables,
-    relationship
+    relationship,
+    Mapped,
+    mapped_column,
+    Enum
 )
 
 
-class Project(Base):
-    """Project Table Object."""
-    __tablename__ = "projects"
+class Experience(Base):
+    """experience Table Object."""
+    __tablename__ = "experiences"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(100), nullable=False)
-    short_description = Column(String(1000), nullable=False)
-    embedding = Column(Vector, nullable=False)
-    started = Column(Date, nullable=False)
-    completed = Column(Date, nullable=True)
-    html = Column(Text, nullable=True)
-    css = Column(Text, nullable=True)
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    experience_type: Mapped[Literal["project", "job"]] = mapped_column(
+        Enum("project", "job", name="experience_type"), nullable=False
+    )
+    short_description: Mapped[str] = mapped_column(
+        String(1000), nullable=False)
+    embedding: Mapped[list[float]] = mapped_column(Vector, nullable=False)
+    started: Mapped[date] = mapped_column(Date, nullable=False)
+    completed: Mapped[date] = mapped_column(Date, nullable=True)
+    html: Mapped[str] = mapped_column(Text, nullable=True)
+    css: Mapped[str] = mapped_column(Text, nullable=True)
 
-    information_sections = relationship(
-        "InformationSection", back_populates="project")
-    images = relationship(
-        "Image", back_populates="project")
+    information_sections: "Mapped[list[InformationSection]]" = relationship(
+        "InformationSection", back_populates="experience")
+    images: "Mapped[list[Image]]" = relationship(
+        "Image", back_populates="experience")
 
     def __init__(
         self,
         name: str,
         short_description: str,
         embedding: list,
-        started: Date,
-        completed: Date = None,
+        experience_type: Literal["project", "job"],
+        started: date,
+        completed: date = None,
         html: str = None,
         css: str = None,
         information_sections: "InformationSection" = [],
-        images: "Image" = [],
+        images: "list[Image]" = [],
         uid: int = None
     ):
         super().__init__(
@@ -50,6 +61,7 @@ class Project(Base):
             name=name,
             short_description=short_description,
             embedding=embedding,
+            experience_type=experience_type,
             started=started,
             completed=completed,
             html=html,
@@ -64,20 +76,22 @@ class InformationSection(Base):
 
     __tablename__ = "sections"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    content = Column(Text, nullable=False)
-    anchor = Column(String(100), nullable=False)
-    embedding = Column(Vector, nullable=False)
-    project_id = Column(Integer, ForeignKey(Project.id))
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, autoincrement=True)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    anchor: Mapped[str] = mapped_column(String(100), nullable=False)
+    embedding: Mapped[list[float]] = mapped_column(Vector, nullable=False)
+    experience_id: Mapped[int] = mapped_column(Integer, ForeignKey(Experience.id))
 
-    project = relationship("Project", back_populates="information_sections")
+    experience: Mapped[Experience] = relationship(
+        "Experience", back_populates="information_sections")
 
     def __init__(
         self,
         content: str,
         anchor: str,
         embedding: list,
-        project: Project,
+        experience: experience,
         uid: int = None
     ):
         super().__init__(
@@ -85,7 +99,7 @@ class InformationSection(Base):
             content=content,
             anchor=anchor,
             embedding=embedding,
-            project=project
+            experience=experience
         )
 
 
@@ -94,24 +108,26 @@ class Image(Base):
 
     __tablename__ = "images"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    filename = Column(String(100), nullable=False)
-    image_data = Column(LargeBinary, nullable=False)
-    project_id = Column(Integer, ForeignKey(Project.id))
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, autoincrement=True)
+    filename: Mapped[str] = mapped_column(String(100), nullable=False)
+    image_data: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
+    experience_id: Mapped[int] = mapped_column(Integer, ForeignKey(Experience.id))
 
-    project = relationship("Project", back_populates="images")
+    experience: Mapped[Experience] = relationship(
+        "Experience", back_populates="images")
 
     def __init__(
         self,
         filename: str,
         image_data: bytes,
-        project: Project,
+        experience: experience,
         uid: str = None
     ):
         super().__init__(
             filename=filename,
             image_data=image_data,
-            project=project,
+            experience=experience,
             id=uid
         )
 
